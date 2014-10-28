@@ -1,0 +1,518 @@
+
+
+<!doctype html>
+<html>
+
+
+<head>
+
+<style>
+body{
+	font-family: Helvetica;
+	font-size: 14px;
+}
+circle{
+	fill:blue;
+
+}
+
+path.line {
+	fill:black;
+	stroke-width":"10px";
+
+}
+
+circle {
+	fill:#bbb;
+}
+.circle:hover{
+	fill: blue;
+}
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+</style>
+<script type="text/javascript" src="d3.v3.min.js"> </script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+ </head>
+
+
+<body>
+
+<!--   <form name="myform" onSubmit="return userInput()">
+            <input name="Submit"  type="submit" value="Add to list" >
+            <input type="text" id="myVal" placeholder="Add some text&hellip;">
+        </form> -->
+
+<!-- onchange works but onsubmit doesn't work -->
+<form name="myform" onsubmit="return userInput()" >
+  		<select id="menuInput" onchange="userInput1()" >
+  			<option value="Select a country">Select a country</option>	
+  			<option value="All Countries">All Countries </option>
+<!--   			<option value="Austrailia">Austrailia</option>
+  			<option value="Korea">Korea </option>
+  			<option value="Austria">Austria </option>
+  			<option value="United States of America">United States of America </option>
+  			<option value="Japan">Japan</option>
+  			<option value="Canada">Canada </option>
+  			<option value="India">India</option> -->
+  		</select>
+ 
+
+  			 <!-- <input name="Submit"  type="submit" value="Add to list" > -->
+            <input  type="text" id="myVal" placeholder="Add some text&hellip;">
+
+ </form>
+<!-- //data info:
+// variable, unit, country, year, value, flag
+//color encode each immunization type
+// draw line graph over years. -->
+
+<!-- <form name="myForm" onSubmit="return userInput()">
+ <input name="Submit"  type="submit" value="Add to list" >
+<input type="text" name="firstname" id="user">
+</form>
+ -->
+<!-- <br>
+Last name: <input type="text" name="lastname"> -->
+
+<script>
+
+ var dataset = [];
+ var userinput;
+// windows.onload(main());
+
+            function userInput(event){
+               var form = document.getElementById("menuInput").value
+               console.log(form.value);
+               userinput = document.getElementById("myVal").value
+               document.getElementById("menuInput").value ="Select a country"
+             //  console.log(userinput)
+                // console.log(document.getElementById("myVal").value)
+                //draw(document.getElementById("myVal").value)
+               d3.select('svg').remove();
+                main();
+                console.log("Main has been called")
+                // draw(document.getElementById("myVal").value)
+                return false;
+            }
+
+            function userInput1(event){
+               var form = document.getElementById("myVal").value;
+               form.value=" ";
+               document.getElementById("myVal").value ="";
+               userinput = document.getElementById("menuInput").value;
+
+               
+             //  console.log(userinput)
+                // console.log(document.getElementById("myVal").value)
+                //draw(document.getElementById("myVal").value)
+               d3.select('svg').remove();
+                main();
+                console.log("Main has been called")
+                // draw(document.getElementById("myVal").value)
+                return false;
+            }
+ 
+            // function draw(val){
+            //     console.log(val)
+            //     d3.select("body").select("ul").append("li");
+            //     dataset.push(val);
+            //     var p = d3.select("body").selectAll("li")
+            //     .data(dataset)
+            //     .text(function(d,i){return i + ": " + d;})
+            // }
+
+//reference
+//http://bl.ocks.org/mbostock/3902569
+
+
+var format = d3.time.format("%Y");
+
+
+main()
+
+function main(){d3.csv("immune.csv",function(data){
+
+  console.log("Main has been called22")
+
+
+	data.forEach(function(d,i){
+		d.Value = +d.Value;
+		d.Year = d.Year;
+		d.Year = format.parse(d.Year);   // format input to time format. 
+	})
+
+var width=1000,
+	height=600;
+
+var svg = d3.select("body").append("svg")	
+			.attr("height",height)
+			.attr("width",(width))
+
+
+// var tip = d3.tip()
+//   .attr('class', 'd3-tip')
+//   .offset([-10, 0])
+//   .html(function(d,i) {
+//   	console.log(d)
+//     return "<strong>Frequency:</strong> <span style='color:red'>" + 
+//     d.key + d.values[0].Value+ "</span>";
+//   })
+// svg.call(tip);
+// line.on("mouseover",tip.show)
+
+
+var mapColor=d3.scale.category10();
+					
+var min = d3.min(data, function(d) {
+	return d.Year;				// + operator converts string to number.
+})
+var max = d3.max(data, function(d) {
+	return d.Year;
+})
+
+var maxYear = format.parse('2014')
+
+// function userInput(event){
+// 	console.log("event")
+// 	console.log(document.getElementById("user").value);
+// 	reDraw(document.getElementById("user").value);
+
+// 	return false;	
+// }
+
+// var userInput = d3.select("#userInput").on(function(d,i){
+// 	// var n = this.value;
+
+// 	reDraw(document.getElementById("userInput").value);
+// 	console.log(document.getElementById("userInput").value);
+// 	return false;
+// })
+
+//sets the domain vairable to mapColor to Variable.
+// Input to mapColor is ["Hepatitis B","Diphtheria, Tetanus, Pertussis","Measles"]
+mapColor.domain(["Hepatitis B","Diphtheria, Tetanus, Pertussis","Measles","Influenza"])
+
+
+xScale = d3.time.scale().domain([min,maxYear])
+		.range([100,width-200]).nice();
+
+
+var ymin = d3.min(data, function(d){
+	return d.Value;
+})
+
+var ymax = d3.max(data, function(d){
+	return d.Value;
+})
+
+
+yScale = d3.scale.linear().domain([0,ymax])
+	.range([500,20])
+
+
+xAxis = d3.svg.axis().scale(xScale).tickSize(20).ticks(d3.time.year,3);
+
+yAxis=d3.svg.axis().scale(yScale)
+			.orient('left');
+
+var line2 = d3.svg.line()
+			.x(function(d)
+				{
+					//return xScale(d.date);
+					return xScale(d.Year);
+				})
+			.y(function(d){
+ 					//return yScale(d.value);
+ 					return yScale(d.Value);
+				})
+
+var inputValue=d3.selectAll("input")
+console.log(inputValue.value)
+
+
+
+// Data Format
+// Variable,Unit,Country,Year,Value,Flags
+// "Hepatitis B","% of children immunised","Australia","2001",94,
+// "Hepatitis B","% of children immunised","Australia","2002",94,
+//
+//  {key: "country_name", values:[Year: "    ", Value:" "....]
+//  group each countries' data into <g>
+
+var groupbycountry= d3.nest().key(function(d){ 
+	//console.log(d)
+	return d.Country;
+}).entries(data)
+
+var countryList =[];
+groupbycountry.forEach(function(d,i){
+	
+	countryList.push(d.key)
+})
+
+
+var x;
+x= d3.select('select')
+
+x.selectAll('option').data(countryList)
+	.enter()
+	.append('option')
+	.attr("value",function(d,i){
+	
+		return d;
+	})
+	.html(function(d,i){
+		return d;
+	})
+
+
+
+//This code works. This generates 2D array in which data are grouped under each nation.
+// But, it's more efficient with the code above using d3.nested()
+// var groupbycountry = countryName.map(function(d,i){
+// 		var name = d;
+// 		console.log(d)
+// 	return {key: d, values: data.filter(function(d){ 
+// 				return name == d.Country;} 			
+// 		)}
+// });	
+
+
+var group = svg.selectAll("g.country")
+				.data(groupbycountry)
+				.enter()
+				.append("g")
+				.attr("class","country")
+			
+
+var circles = group.selectAll('circle')
+	 	.data(function(d){
+	 		return d.values;				//d.values is the array of annual values for each
+ 										// immunization
+ 			})
+
+//reDraw();
+var inputNation;
+
+// function reDraw(xn){
+// 	inputNation = xn;
+// console.log(userinput)
+
+circles.enter().append('circle')
+	//filter by country
+	.filter(function(d,i){
+					// console.log(d)
+					if (userinput == null){
+						return false;
+					}
+					if (userinput == "All Countries"){
+						return true;
+					}
+					else{
+							console.log(userinput)
+							return (d.Country == userinput);
+					}
+				})
+	.attr("cx",function(d,i){
+		return xScale((d.Year))
+		})
+	.attr("cy",function(d,i){
+		return yScale(d.Value)
+		//return yScale((d.values[i].Value))
+		})
+	.attr('r',4)
+	.style("stroke","grey")	
+	// .style("stroke",function(d,i){
+	// 		return mapColor(d.Variable);
+ // 				//return fill color of cirlce based on the disease
+	// 	})
+	.attr('class','circle')
+	.style('fill',function(d,i){
+		return mapColor(d.Variable)
+	})
+	.style('opacity','0.4')
+
+// circles.on("mouseover", function() {
+//         d3.select(this)
+//           .style("fill", "orange");
+// });
+
+// Add x & y axis
+svg.append('g')
+	.attr('class','xaxis')
+	.call(xAxis)
+	.attr('transform','translate(0,500)')
+	.style('fill','none')
+	.style('stroke','black')
+	.selectAll('text')
+	.style('fill','black')
+	.style('font-size',11)
+
+
+svg.append('g')
+	.attr('class','yaxis')
+	.attr('transform','translate(95,0)')
+	.call(yAxis)
+	.style('fill','none')
+	.style('stroke','black')
+	.selectAll('text')
+	.style('fill','black')
+	.style('font-size',11)
+    .style("text-anchor", "end")
+ //   .attr("dx", "-2em")
+//    .attr("dy", ".15em")
+    // .attr("transform", function(d) {
+    //     return "rotate(-180)" 
+    //     });
+
+//Create double nested array 
+// First groupd by country, then group by disease to draw linegraph for each disease type.
+
+var groupbycountry2 = d3.nest().key(function(d){ 
+								//console.log(d)
+										return d.Country;
+									})
+								.key(function(d,i){
+										return d.Variable
+									})
+								.entries(data)
+
+
+ var cities = mapColor.domain().map(function(a) {
+   		return {name: a, values: data.filter(function(d){
+  			return d.Variable == a;
+	  }).map(function(d,i) {   		
+   			return { date: d.Year, value: d["Value"], country: d["Country"] };
+   		})}
+});
+
+
+
+//Create group elements for nation and then for disease
+var nations = svg.selectAll(".nations")
+				.data(groupbycountry2)
+				.enter()
+				.append('g')
+		//filter by country
+				// .filter(function(d,i){
+				// 	console.log("Ya")
+				// 	return (d.key == "Korea");
+				// 	})
+				.attr('class','nations')
+
+
+
+var disease = nations.selectAll(".disease")
+		.data(function(d,i){
+			console.log(d)
+			return d.values})
+		.enter()
+		.append('g') 
+		.attr('class','disease')
+
+
+//draw line graph for each disease type.
+var line= disease.append('path')
+			.filter(function(d,i){
+					// console.log(d)
+					console.log(d)
+			if (userinput == null){
+						return false;
+				}
+			if (userinput == "All Countries"){
+				return true;
+			}
+			else{
+
+				return (d.values[0].Country == userinput);
+					}
+				})	
+		.attr("d",function(d){
+				return line2(d.values)   //d.values is array of yearly values for each disease.
+		})
+		.style("stroke",function(d,i){
+			//console.log(mapColor(d.name))
+			return mapColor(d.key);
+		})
+		.style("fill","none")
+		//.style("stroke-width","2px")
+		.style("opacity",0.8)
+		.attr("class","line")
+
+		// .append('text')
+		// .text(function(d,i){
+		// 	return d.Country
+		// 	})
+		// .attr('transform', function(d,i) { return 'translate('+ (width-20)+',' + ((height-318)+(25*i))+ ')'})
+
+	
+	// d3.select(this).style("stroke-width","10px");
+	// return tip.show;
+	
+
+// .on("mouseout",function(d,i){
+// 	//d3.select(this).style("stroke-width","3px");
+// 	tip.hide
+// 			})
+
+//       	.on('mouseout', tip.hide)
+
+
+//Drawing legend
+var re =svg.selectAll('.legend')
+		.data(["Hepatitis B","Diphtheria, Tetanus, Pertussis","Measles","Influenza"])
+		.enter()
+		.append('g')
+		.attr('class','legend')
+
+re.append('rect')
+		.style('fill',function(d,i){
+			return mapColor(d);
+			})
+		.attr('transform', function(d,i) { return 'translate('+ (width-180)+',' + ((height-580)+(25*i))+ ')'})
+		.attr('width',18)
+		.attr('height',18)
+re.append('text')
+		.text(function(d,i){
+			return d
+			})
+		.attr('transform', function(d,i) { return 'translate('+ (width-155)+',' + ((height-568)+(25*i))+ ')'})
+		.style('font-size',11)
+	
+
+
+
+}) // end of d3.csv("immune.csv")
+
+} // end of main function
+</script>
+</body>
+</html>
